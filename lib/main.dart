@@ -5,12 +5,15 @@ import 'package:provider/provider.dart';
 import 'package:secure_messenger/app_state.dart';
 import 'package:secure_messenger/firebase_options.dart';
 import 'package:secure_messenger/screens/auth_gate.dart';
+import 'package:secure_messenger/screens/bio_authentication.dart';
 // import 'package:secure_messenger/screens/bio_authentication.dart';
 import 'package:secure_messenger/screens/login.dart';
 // import 'package:secure_messenger/screens/profile.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations(
+      List.from([DeviceOrientation.portraitUp]));
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -22,14 +25,13 @@ class SecureMessengerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations(
-        List.from([DeviceOrientation.portraitUp]));
     return ChangeNotifierProvider(
       create: (context) => AppState(),
       child: MaterialApp(
         initialRoute: '/',
         routes: {
           '/': (context) => const GoogleAuthGate(),
+          // '/': (context) => const BioAuthenticationScreen(),
           'login': (context) => const LoginScreen(),
         },
       ),

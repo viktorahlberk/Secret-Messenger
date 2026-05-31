@@ -9,12 +9,13 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:local_auth/error_codes.dart' as auth_error;
 import 'package:local_auth/local_auth.dart';
 import 'package:secure_messenger/screens/profile.dart';
 import 'package:secure_messenger/services/google_auth.dart';
 
 class BioAuthenticationScreen extends StatefulWidget {
-  const BioAuthenticationScreen(this.data, {Key? key}) : super(key: key);
+  const BioAuthenticationScreen(this.data, {super.key});
   final User? data;
   @override
   State<BioAuthenticationScreen> createState() =>
@@ -25,33 +26,33 @@ class _BioAuthenticationScreenState extends State<BioAuthenticationScreen> {
   final LocalAuthentication auth = LocalAuthentication();
   _SupportState _supportState = _SupportState.unknown;
   bool? _canCheckBiometrics;
-  // List<BiometricType>? _availableBiometrics;
   String _authorized = 'Not Authorized';
   bool _isAuthenticating = false;
 
   @override
   void initState() {
     super.initState();
-    auth.isDeviceSupported().then(
-          (bool isSupported) => setState(() => _supportState = isSupported
-              ? _SupportState.supported
-              : _SupportState.unsupported),
-        );
+    _checkDeviceSupport();
   }
 
-  Future<void> _checkBiometrics() async {
+  Future<void> _checkDeviceSupport() async {
+    late bool isSupported;
     late bool canCheckBiometrics;
     try {
+      isSupported = await auth.isDeviceSupported();
       canCheckBiometrics = await auth.canCheckBiometrics;
     } on PlatformException catch (e) {
+      isSupported = false;
       canCheckBiometrics = false;
-      print(e);
+      debugPrint('Local auth support check failed: $e');
     }
     if (!mounted) {
       return;
     }
 
     setState(() {
+      _supportState =
+          isSupported ? _SupportState.supported : _SupportState.unsupported;
       _canCheckBiometrics = canCheckBiometrics;
     });
   }
@@ -105,7 +106,7 @@ class _BioAuthenticationScreenState extends State<BioAuthenticationScreen> {
   //       () => _authorized = authenticated ? 'Authorized' : 'Not Authorized');
   // }
 
-  Future<void> _authenticateWithBiometrics() async {
+  Future<void> _authenticate() async {
     bool authenticated = false;
     try {
       setState(() {
@@ -113,22 +114,19 @@ class _BioAuthenticationScreenState extends State<BioAuthenticationScreen> {
         _authorized = 'Authenticating';
       });
       authenticated = await auth.authenticate(
-        localizedReason:
-            'Scan your fingerprint (or face or whatever) to authenticate',
+        localizedReason: 'Authenticate to open Secret Messenger',
         options: const AuthenticationOptions(
           stickyAuth: true,
-          biometricOnly: true,
+          biometricOnly: false,
         ),
       );
       setState(() {
         _isAuthenticating = false;
-        _authorized = 'Authenticating';
       });
     } on PlatformException catch (e) {
-      print(e);
       setState(() {
         _isAuthenticating = false;
-        _authorized = 'Error - ${e.message}';
+        _authorized = _messageForAuthError(e);
       });
       return;
     }
@@ -140,15 +138,43 @@ class _BioAuthenticationScreenState extends State<BioAuthenticationScreen> {
     setState(() {
       _authorized = message;
     });
+
+    if (authenticated) {
+      _openProfile();
+    }
   }
 
-  // Future<void> _cancelAuthentication() async {
-  //   await auth.stopAuthentication();
-  //   setState(() => _isAuthenticating = false);
-  // }
-  logOut() async {
+  String _messageForAuthError(PlatformException error) {
+    switch (error.code) {
+      case auth_error.notEnrolled:
+        return 'No biometric is enrolled. Set a screen lock or add a fingerprint in the emulator/device settings.';
+      case auth_error.passcodeNotSet:
+        return 'No screen lock is set. Add a PIN, pattern, password, or biometric first.';
+      case auth_error.notAvailable:
+        return 'Local authentication is not available on this device.';
+      case auth_error.lockedOut:
+      case auth_error.permanentlyLockedOut:
+        return 'Local authentication is locked. Unlock the device with PIN/password and try again.';
+      default:
+        return 'Authorization failed: ${error.message ?? error.code}';
+    }
+  }
+
+  void _openProfile() {
+    if (!mounted) {
+      return;
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProfilePage(signInData: widget.data),
+      ),
+    );
+  }
+
+  Future<void> logOut() async {
     await AuthService.logOutFromGoogle();
-    // Navigator.pushNamed(context, 'login');
   }
 
   @override
@@ -175,7 +201,9 @@ class _BioAuthenticationScreenState extends State<BioAuthenticationScreen> {
               if (_supportState == _SupportState.unknown)
                 const CircularProgressIndicator()
               else if (_supportState == _SupportState.supported)
-                const Text('This device is supported')
+                Text(_canCheckBiometrics == true
+                    ? 'This device is ready for biometric auth'
+                    : 'This device can use screen lock auth')
               else
                 Column(
                   children: [
@@ -239,7 +267,7 @@ class _BioAuthenticationScreenState extends State<BioAuthenticationScreen> {
                   // ),
                   _supportState == _SupportState.supported
                       ? ElevatedButton(
-                          onPressed: _authenticateWithBiometrics,
+                          onPressed: _authenticate,
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
@@ -253,18 +281,11 @@ class _BioAuthenticationScreenState extends State<BioAuthenticationScreen> {
                       : Container(),
                   _authorized == 'Authorized'
                       ? TextButton(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              // settings: const RouteSettings(name: 'profile'),
-                              builder: (context) =>
-                                  ProfilePage(signInData: widget.data),
-                            ),
-                          ),
+                          onPressed: _openProfile,
                           child: const Text(
                               'Good! You are authenticated! \nGo in ->'),
                         )
-                      : Container(),
+                      : Text(_authorized),
                 ],
               ),
             ],
