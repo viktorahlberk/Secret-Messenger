@@ -12,7 +12,6 @@ import 'package:secure_messenger/screens/login.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    name: 'Secure Messenger',
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(const SecureMessengerApp());
