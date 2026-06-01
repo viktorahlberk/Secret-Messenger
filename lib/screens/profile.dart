@@ -9,10 +9,11 @@ import 'package:provider/provider.dart';
 import 'package:secure_messenger/app_state.dart';
 import 'package:secure_messenger/models/user_profile.dart';
 import 'package:secure_messenger/screens/chats.dart';
+import 'package:secure_messenger/screens/qr.dart';
 import 'package:secure_messenger/screens/search.dart';
 // import 'package:secure_messenger/screens/auth_gate.dart';
-import 'package:secure_messenger/services/database.dart';
-import 'package:secure_messenger/services/google_auth.dart';
+import 'package:secure_messenger/services/firebase/database.dart';
+import 'package:secure_messenger/services/firebase/google_auth.dart';
 // import 'package:qr_flutter/qr_flutter.dart';
 import 'package:secure_messenger/services/qr_code.dart';
 import 'package:webcrypto/webcrypto.dart';
@@ -55,7 +56,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return d;
   }
 
-  logOut(BuildContext context) async {
+  Future<void> logOut(BuildContext context) async {
     await AuthService.logOutFromGoogle();
     // ignore: use_build_context_synchronously
     Navigator.pop(context);
@@ -69,15 +70,23 @@ class _ProfilePageState extends State<ProfilePage> {
         ));
   }
 
+  Future<void> navigateToQrScreen() async {
+    await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => QrScreen(widget.signInData!.uid),
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer(
-      builder: (context, AppState appState, child) {
-        inspect(appState);
+      builder: (context, AppState appState, _) {
+        // inspect(appState);
         return Scaffold(
           appBar: AppBar(
             automaticallyImplyLeading: false,
-            title: const Text('Profile'),
+            title: Center(child: Text('Profile')),
             leading: IconButton(
                 onPressed: () => Navigator.push(
                     context,
@@ -86,6 +95,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     )),
                 icon: const Icon(Icons.chat)),
             actions: [
+              IconButton(
+                  onPressed: navigateToQrScreen, icon: Icon(Icons.qr_code)),
               IconButton(
                   onPressed: navigateToSearchScreen,
                   icon: const Icon(Icons.search)),
@@ -99,6 +110,7 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Padding(
               padding: const EdgeInsets.only(top: 20.0),
               child: Column(
+                // mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   CircleAvatar(
                       child: Image.network(widget.signInData!.photoURL!)),
@@ -151,8 +163,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   Text(appState.userEmail ?? 'No email provided'),
-                  const Spacer(),
-                  QrCodeService.createQrCode(appState.userUid),
+                  // const Spacer(),
                 ],
               ),
             ),

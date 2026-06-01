@@ -1,5 +1,5 @@
 import 'package:secure_messenger/models/message.dart';
-import 'package:secure_messenger/services/database.dart';
+import 'package:secure_messenger/services/firebase/database.dart';
 import 'package:secure_messenger/services/encryption.dart';
 
 class ChatService {
@@ -10,10 +10,7 @@ class ChatService {
 
   static sendMessage(
       chatUid, senderUid, receiverUid, message, messageType) async {
-    var timestamp = DateTime.now().millisecondsSinceEpoch;
-    // print(
-    //   '$chatUid, $senderUid, $receiverUid, $timestamp, $message, $messageType',
-    // );
+    int timestamp = DateTime.now().millisecondsSinceEpoch;
     if (messageType == 'text') {
       var receiverPublicKey =
           await DatabaseService.fetchUserPublicKey(receiverUid);
@@ -33,7 +30,6 @@ class ChatService {
     String receiverUid,
     String newMessage,
   ) async {
-    // if (messageType == 'text') {
     String receiverPublicKey =
         await DatabaseService.fetchUserPublicKey(receiverUid);
     String encryptedMessage =

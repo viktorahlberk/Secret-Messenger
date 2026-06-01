@@ -12,7 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:local_auth/error_codes.dart' as auth_error;
 import 'package:local_auth/local_auth.dart';
 import 'package:secure_messenger/screens/profile.dart';
-import 'package:secure_messenger/services/google_auth.dart';
+import 'package:secure_messenger/services/firebase/google_auth.dart';
 
 class BioAuthenticationScreen extends StatefulWidget {
   const BioAuthenticationScreen(this.data, {super.key});

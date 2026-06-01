@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:secure_messenger/models/user_profile.dart';
 import 'package:secure_messenger/screens/chat.dart';
-import 'package:secure_messenger/services/chat.dart';
-import 'package:secure_messenger/services/database.dart';
+import 'package:secure_messenger/services/chat_service.dart';
+import 'package:secure_messenger/services/firebase/database.dart';
 import 'package:secure_messenger/services/qr_code.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -20,7 +20,7 @@ class _SearchScreenState extends State<SearchScreen> {
     String uid = await QrCodeService.scanQrCode();
     // print(uid);
     if (uid.isNotEmpty) {
-      UserProfile userProfile = await DatabaseService.fetchUserData(uid);
+      UserProfile? userProfile = await DatabaseService.fetchUserData(uid);
       var response = await showDialog(
         context: context,
         builder: (context) {
@@ -30,8 +30,8 @@ class _SearchScreenState extends State<SearchScreen> {
                 children: [
                   const Text('User found!'),
                   CircleAvatar(
-                      child: Image.network(userProfile.profilePictureUrl)),
-                  Text(userProfile.userName ?? ''),
+                      child: Image.network(userProfile!.profilePictureUrl)),
+                  Text(userProfile.userName ?? 'null'),
                   const Text(
                     'Start chatting?',
                     style: TextStyle(fontWeight: FontWeight.bold),

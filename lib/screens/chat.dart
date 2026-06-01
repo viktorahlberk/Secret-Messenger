@@ -5,11 +5,11 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:secure_messenger/models/message.dart';
-import 'package:secure_messenger/services/chat.dart';
-import 'package:secure_messenger/services/database.dart';
+import 'package:secure_messenger/services/chat_service.dart';
+import 'package:secure_messenger/services/firebase/database.dart';
 import 'package:secure_messenger/services/encryption.dart';
 import 'package:secure_messenger/services/image_picker.dart';
-import 'package:secure_messenger/services/storage.dart';
+import 'package:secure_messenger/services/firebase/storage.dart';
 import 'package:video_player/video_player.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -443,6 +443,8 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ),
+
+//Chat typing field
           Row(
             children: [
               Expanded(

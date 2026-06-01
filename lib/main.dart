@@ -14,6 +14,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(
       List.from([DeviceOrientation.portraitUp]));
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -33,6 +34,7 @@ class SecureMessengerApp extends StatelessWidget {
           '/': (context) => const GoogleAuthGate(),
           // '/': (context) => const BioAuthenticationScreen(),
           'login': (context) => const LoginScreen(),
+          // 'qr': (context)
         },
       ),
     );

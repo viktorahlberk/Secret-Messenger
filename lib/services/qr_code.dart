@@ -1,5 +1,3 @@
-// import 'dart:convert';
-
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 // import 'package:secure_messenger/models/user_profile.dart';

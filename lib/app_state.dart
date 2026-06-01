@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:secure_messenger/models/user_profile.dart';
-import 'package:secure_messenger/services/database.dart';
+import 'package:secure_messenger/services/firebase/database.dart';
 
 class AppState with ChangeNotifier {
   UserProfile? _userProfile;

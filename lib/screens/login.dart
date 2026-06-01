@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 // import 'package:secure_messenger/services/bio_auth.dart';
-import 'package:secure_messenger/services/google_auth.dart';
+import 'package:secure_messenger/services/firebase/google_auth.dart';
 import 'package:secure_messenger/widgets/square_tile.dart';
 
 class LoginScreen extends StatefulWidget {
