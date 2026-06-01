@@ -5,10 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:secure_messenger/app_state.dart';
 import 'package:secure_messenger/firebase_options.dart';
 import 'package:secure_messenger/screens/auth_gate.dart';
-import 'package:secure_messenger/screens/bio_authentication.dart';
-// import 'package:secure_messenger/screens/bio_authentication.dart';
 import 'package:secure_messenger/screens/login.dart';
-// import 'package:secure_messenger/screens/profile.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

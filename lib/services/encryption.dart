@@ -1,18 +1,13 @@
 import 'dart:convert' show base64, json, utf8;
 import 'package:flutter/foundation.dart';
 import 'package:secure_messenger/services/firebase/database.dart';
+import 'package:secure_messenger/services/local_storage.dart';
 import 'package:webcrypto/webcrypto.dart';
 
 import 'dart:typed_data';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EncryptionService {
-  static Future<bool> privateKeyExist() async {
-    final sPreferences = await SharedPreferences.getInstance();
-    String? privateKey = sPreferences.getString('key');
-    return privateKey != null ? true : false;
-  }
-
   static Future<KeyPair<EcdhPrivateKey, EcdhPublicKey>> generateKeys() async {
     KeyPair<EcdhPrivateKey, EcdhPublicKey> keyPair =
         await EcdhPrivateKey.generateKey(EllipticCurve.p256);
@@ -35,15 +30,14 @@ class EncryptionService {
     final Uint8List iv = Uint8List.fromList('Initialization Vector'.codeUnits);
 
     // var encodedKey = preferences.getString('key');
-    bool privateKeyExist = await EncryptionService.privateKeyExist();
-    if (!privateKeyExist) {
-      throw Exception('Private encryption key is missing from this device');
-    }
+    // bool privateKeyExist = await LocalStorageService.privateKeyExist();
+    // if (!privateKeyExist) {
+    //   throw Exception('Private encryption key is missing from this device');
+    // }
 
-    final preferences = await SharedPreferences.getInstance();
-    String? encodedKey = preferences.getString('key');
+    String privateKey = await LocalStorageService().getPrivateKey();
 
-    dynamic myPrivateKeyJwk = json.decode(encodedKey!);
+    dynamic myPrivateKeyJwk = json.decode(privateKey);
     EcdhPrivateKey x = await EcdhPrivateKey.importJsonWebKey(
         myPrivateKeyJwk, EllipticCurve.p256);
     EcdhPublicKey y = await EcdhPublicKey.importJsonWebKey(
@@ -62,12 +56,8 @@ class EncryptionService {
   static Future<String> decryptMessage(
       String encryptedMessage, senderUid) async {
     final Uint8List iv = Uint8List.fromList('Initialization Vector'.codeUnits);
-    final preferences = await SharedPreferences.getInstance();
-    var encodedKey = preferences.getString('key');
-    if (encodedKey == null) {
-      throw Exception('Private encryption key is missing from this device');
-    }
-    var myPrivateKeyJwk = json.decode(encodedKey);
+    String privateKey = await LocalStorageService().getPrivateKey();
+    var myPrivateKeyJwk = json.decode(privateKey);
     EcdhPrivateKey x = await EcdhPrivateKey.importJsonWebKey(
         myPrivateKeyJwk, EllipticCurve.p256);
     var senderPublicKey = await DatabaseService.fetchUserPublicKey(senderUid);

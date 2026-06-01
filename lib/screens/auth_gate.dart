@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:secure_messenger/screens/bio_authentication.dart';
 import 'package:secure_messenger/screens/login.dart';
 import 'package:secure_messenger/screens/profile.dart';
+import 'package:secure_messenger/services/local_storage.dart';
 
 class GoogleAuthGate extends StatelessWidget {
   const GoogleAuthGate({super.key});

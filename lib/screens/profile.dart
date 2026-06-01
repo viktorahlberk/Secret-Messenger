@@ -14,6 +14,7 @@ import 'package:secure_messenger/screens/search.dart';
 // import 'package:secure_messenger/screens/auth_gate.dart';
 import 'package:secure_messenger/services/firebase/database.dart';
 import 'package:secure_messenger/services/firebase/google_auth.dart';
+import 'package:secure_messenger/services/local_storage.dart';
 // import 'package:qr_flutter/qr_flutter.dart';
 import 'package:secure_messenger/services/qr_code.dart';
 import 'package:webcrypto/webcrypto.dart';
@@ -31,13 +32,17 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController _usernameController = TextEditingController();
   bool _isEditing = false;
+  late bool privateKeyExist;
+
   @override
   initState() {
     initUser(widget.signInData);
+
     super.initState();
   }
 
   dynamic initUser(User? signInData) async {
+    privateKeyExist = await LocalStorageService().privateKeyExist();
     if (!await DatabaseService.isUserExists(signInData!.uid)) {
       KeyPair<EcdhPrivateKey, EcdhPublicKey> keys =
           await EncryptionService.generateKeys();
@@ -163,7 +168,21 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   Text(appState.userEmail ?? 'No email provided'),
-                  // const Spacer(),
+                  const Spacer(),
+                  Visibility(
+                    child: Column(
+                      children: [
+                        Text(
+                            'Your device didn\'t have encryption keys. You are unable write or receive new messages. Create new keys or use device with proper encryption keys.'),
+                        TextButton(
+                            onPressed: () {},
+                            style: ButtonStyle(
+                                backgroundColor:
+                                    WidgetStatePropertyAll(Colors.blueAccent)),
+                            child: Text('Create new keys'))
+                      ],
+                    ),
+                  )
                 ],
               ),
             ),
