@@ -42,27 +42,32 @@ class DatabaseService {
         userData.email, userData.photoURL);
   }
 
-  static dynamic fetchUserData(String userUid) async {
-    DataSnapshot snapshot =
+  static Future<UserProfile?> fetchUserData(String userUid) async {
+    final snapshot =
         await FirebaseDatabase.instance.ref().child('users/$userUid').get();
-    if (snapshot.exists) {
-      var u = snapshot.value as Map;
-      return UserProfile(
-        userUid,
-        u['key'],
-        u['userName'],
-        u['email'],
-        u['picturePath'],
-      );
+
+    if (!snapshot.exists || snapshot.value == null) {
+      return null;
     }
+
+    final data = Map<String, dynamic>.from(snapshot.value as Map);
+
+    return UserProfile(
+      userUid,
+      data['key'],
+      data['userName'],
+      data['email'],
+      data['picturePath'],
+    );
   }
 
-  static dynamic fetchUserDataByEmail(String email) async {
+  static Future<UserProfile?> fetchUserDataByEmail(String email) async {
+    UserProfile? profile;
     DataSnapshot snapshot =
         await FirebaseDatabase.instance.ref().child('users').get();
     if (snapshot.exists) {
-      var u = snapshot.value as Map;
-      UserProfile? profile;
+      Map u = snapshot.value as Map;
+
       u.forEach((key, value) {
         if (value['email'] == email) {
           profile = UserProfile(
@@ -74,8 +79,8 @@ class DatabaseService {
           );
         }
       });
-      return profile;
     }
+    return profile;
   }
 
   static Future<void> updateUserName(String userUid, String newUserName) async {
@@ -84,7 +89,8 @@ class DatabaseService {
     await ref.set(newUserName);
   }
 
-  static addChatRoom(int chatUid, String userId1, String userId2) async {
+  static Future<void> addChatRoom(
+      int chatUid, String userId1, String userId2) async {
     // var uid = DateTime.now().microsecondsSinceEpoch;
     await FirebaseDatabase.instance
         .ref()
