@@ -28,8 +28,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // UserProfile? userProfile;
-  TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   bool _isEditing = false;
   @override
   initState() {
@@ -37,7 +36,7 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
   }
 
-  initUser(User? signInData) async {
+  dynamic initUser(User? signInData) async {
     if (!await DatabaseService.isUserExists(signInData!.uid)) {
       KeyPair<EcdhPrivateKey, EcdhPublicKey> keys =
           await EncryptionService.generateKeys();

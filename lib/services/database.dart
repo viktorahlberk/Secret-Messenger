@@ -24,29 +24,29 @@ class DatabaseService {
     }
   }
 
-  static addUser(
+  static Future<UserProfile> addUser(
       User userData, KeyPair<EcdhPrivateKey, EcdhPublicKey> keys) async {
     var jwkpublic = await keys.publicKey.exportJsonWebKey();
-    // final keyPair = generateKeyPair();
     await FirebaseDatabase.instance.ref().child('users/${userData.uid}').set({
       'userName': userData.displayName,
       'key': jsonEncode(jwkpublic),
       'email': userData.email,
       'picturePath': userData.photoURL,
     });
+
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    var jwkprivate = await keys.privateKey.exportJsonWebKey();
+    Map<String, dynamic> jwkprivate = await keys.privateKey.exportJsonWebKey();
     await prefs.setString('key', jsonEncode(jwkprivate));
+
     return UserProfile(userData.uid, jwkpublic, userData.displayName,
         userData.email, userData.photoURL);
   }
 
-  static fetchUserData(String userUid) async {
+  static dynamic fetchUserData(String userUid) async {
     DataSnapshot snapshot =
         await FirebaseDatabase.instance.ref().child('users/$userUid').get();
     if (snapshot.exists) {
       var u = snapshot.value as Map;
-      // inspect(u);
       return UserProfile(
         userUid,
         u['key'],
@@ -54,22 +54,17 @@ class DatabaseService {
         u['email'],
         u['picturePath'],
       );
-      // return User(u['username'], u['email'], double.parse(u['balance']));
     }
   }
 
-  /// Algorithm speed is O(n)
-  static fetchUserDataByEmail(String email) async {
+  static dynamic fetchUserDataByEmail(String email) async {
     DataSnapshot snapshot =
         await FirebaseDatabase.instance.ref().child('users').get();
     if (snapshot.exists) {
       var u = snapshot.value as Map;
-      // inspect(u);
       UserProfile? profile;
       u.forEach((key, value) {
-        // print(key);
         if (value['email'] == email) {
-          // print(key);
           profile = UserProfile(
             key,
             value['key'],
@@ -79,15 +74,13 @@ class DatabaseService {
           );
         }
       });
-      // print(profile);
       return profile;
     }
   }
 
-  static updateUserName(String userUid, String newUserName) async {
+  static Future<void> updateUserName(String userUid, String newUserName) async {
     DatabaseReference ref =
         FirebaseDatabase.instance.ref().child('users/$userUid/userName');
-    // print(ref.);
     await ref.set(newUserName);
   }
 

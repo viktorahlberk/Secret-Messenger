@@ -34,11 +34,12 @@ class _ChatScreenState extends State<ChatScreen> {
   bool typingIsActive = false;
   bool opponentIsTyping = false;
 
-  fetchReceiverUid() async {
+  void fetchReceiverUid() async {
     DataSnapshot ds = await FirebaseDatabase.instance
         .ref('chats/${widget.chatUid}/chatters')
         .get();
     if (ds.exists) {
+      // inspect(ds);
       var data = ds.value as String;
       var splitted = data.split(' ');
       if (splitted[0] == widget.senderUid) {
@@ -94,7 +95,7 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  void _scrollToBottom() {
+  dynamic _scrollToBottom() {
     _listViewController.animateTo(
       _listViewController.position.maxScrollExtent,
       duration: const Duration(milliseconds: 1000),
@@ -102,7 +103,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  update() async {
+  dynamic update() async {
     var m = await DatabaseService.fetchChatMessages(widget.chatUid.toString());
     setState(() {
       messages = m;
@@ -131,14 +132,14 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  markMessageToReaded(Message m) async {
+  dynamic markMessageToReaded(Message m) async {
     await DatabaseService.markMessageToReaded(widget.chatUid, m.key);
   }
 
   pickAndStoreImageMessage() async {
     XFile? pickedImage = await ImagepickerService.getImage();
     if (pickedImage != null) {
-      var image = File(pickedImage.path);
+      File image = File(pickedImage.path);
       await StorageService.uploadImageToFirebase(image);
       var imageName =
           await StorageService.getImageDownloadLink(pickedImage.name);
@@ -357,7 +358,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                           children: [
                                             Flexible(
                                               child: Text(
-                                                snapshot.data!,
+                                                snapshot.data ?? 'null',
                                                 overflow: TextOverflow.visible,
                                                 softWrap: true,
                                               ),

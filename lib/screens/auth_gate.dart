@@ -2,9 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:secure_messenger/screens/bio_authentication.dart';
 import 'package:secure_messenger/screens/login.dart';
+import 'package:secure_messenger/screens/profile.dart';
 
 class GoogleAuthGate extends StatelessWidget {
   const GoogleAuthGate({super.key});
+  final bool bioAuthIsUsed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,11 @@ class GoogleAuthGate extends StatelessWidget {
             return const LoginScreen();
           }
 
-          return BioAuthenticationScreen(user);
+          return bioAuthIsUsed
+              ? BioAuthenticationScreen(user)
+              : ProfilePage(
+                  signInData: user,
+                );
         },
       ),
     );
