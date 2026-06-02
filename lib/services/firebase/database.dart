@@ -170,7 +170,7 @@ class DatabaseService {
     List<Map> userChats = [];
     if (snapshot.exists) {
       var chats = snapshot.value as Map;
-      inspect(chats);
+      // inspect(chats);
       chats.forEach((key, value) {
         String s = value['chatters'];
         if (s.contains(userUid)) {
@@ -237,4 +237,5 @@ class DatabaseService {
         .ref('chats/$chatUid/messages/$messageUid/message');
     ref.set(newMessage);
   }
+  // static deleteUser
 }

@@ -5,7 +5,7 @@ import 'package:secure_messenger/services/local_storage.dart';
 import 'package:webcrypto/webcrypto.dart';
 
 import 'dart:typed_data';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 
 class EncryptionService {
   static Future<KeyPair<EcdhPrivateKey, EcdhPublicKey>> generateKeys() async {

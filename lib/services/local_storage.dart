@@ -1,8 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorageService {
-  // String? _privateKey;
-
   Future<bool> privateKeyExist() async {
     final sPreferences = await SharedPreferences.getInstance();
     String? privateKey = sPreferences.getString('key');

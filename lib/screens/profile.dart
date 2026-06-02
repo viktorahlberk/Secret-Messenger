@@ -1,22 +1,13 @@
-// import 'dart:developer';
-
-// import 'package:barcode_scan2/barcode_scan2.dart';
-import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:secure_messenger/app_state.dart';
-import 'package:secure_messenger/models/user_profile.dart';
 import 'package:secure_messenger/screens/chats.dart';
 import 'package:secure_messenger/screens/qr.dart';
 import 'package:secure_messenger/screens/search.dart';
-// import 'package:secure_messenger/screens/auth_gate.dart';
 import 'package:secure_messenger/services/firebase/database.dart';
 import 'package:secure_messenger/services/firebase/google_auth.dart';
 import 'package:secure_messenger/services/local_storage.dart';
-// import 'package:qr_flutter/qr_flutter.dart';
-import 'package:secure_messenger/services/qr_code.dart';
 import 'package:webcrypto/webcrypto.dart';
 
 import '../services/encryption.dart';
@@ -32,38 +23,44 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController _usernameController = TextEditingController();
   bool _isEditing = false;
-  late bool privateKeyExist;
+  bool _privateKeyExist = true;
 
   @override
   initState() {
     initUser(widget.signInData);
-
     super.initState();
   }
 
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    super.dispose();
+  }
+
   dynamic initUser(User? signInData) async {
-    privateKeyExist = await LocalStorageService().privateKeyExist();
+    _privateKeyExist = await LocalStorageService().privateKeyExist();
     if (!await DatabaseService.isUserExists(signInData!.uid)) {
       KeyPair<EcdhPrivateKey, EcdhPublicKey> keys =
           await EncryptionService.generateKeys();
       DatabaseService.addUser(signInData, keys);
     } else {
-      // ignore: use_build_context_synchronously
-      AppState appState = Provider.of<AppState>(context, listen: false);
-      // if (appState.userProfile == null) {
-      await appState.initUser(signInData.uid);
-      // }
+      if (mounted) {
+        AppState appState = Provider.of<AppState>(context, listen: false);
+        await appState.initUser(signInData.uid);
+      }
     }
   }
 
-  setUser(signInData) async {
-    var d = await DatabaseService.fetchUserData(signInData.uid);
-    return d;
-  }
+  // setUser(signInData) async {
+  //   var d = await DatabaseService.fetchUserData(signInData.uid);
+  //   return d;
+  // }
 
-  Future<void> logOut(BuildContext context) async {
+  Future<void> logOut() async {
     await AuthService.logOutFromGoogle();
-    // ignore: use_build_context_synchronously
+
+    if (!mounted) return;
+
     Navigator.pop(context);
   }
 
@@ -87,102 +84,167 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, AppState appState, _) {
-        // inspect(appState);
         return Scaffold(
+          backgroundColor: Colors.grey.shade400,
           appBar: AppBar(
+            backgroundColor: Colors.grey.shade400,
             automaticallyImplyLeading: false,
-            title: Center(child: Text('Profile')),
-            leading: IconButton(
-                onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ChatsScreen(widget.signInData!.uid),
-                    )),
-                icon: const Icon(Icons.chat)),
+            // title: Center(child: Text('Profile')),
+            leading: Visibility(
+              visible: _privateKeyExist,
+              child: IconButton(
+                  onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ChatsScreen(widget.signInData!.uid),
+                      )),
+                  icon: const Icon(Icons.chat)),
+            ),
             actions: [
               IconButton(
-                  onPressed: navigateToQrScreen, icon: Icon(Icons.qr_code)),
+                  onPressed: navigateToQrScreen, icon: Icon(Icons.qr_code_2)),
               IconButton(
                   onPressed: navigateToSearchScreen,
                   icon: const Icon(Icons.search)),
               IconButton(
-                onPressed: () => logOut(context),
+                onPressed: () => logOut(),
                 icon: const Icon(Icons.logout),
               )
             ],
           ),
           body: Center(
             child: Padding(
-              padding: const EdgeInsets.only(top: 20.0),
+              padding: const EdgeInsets.all(20),
               child: Column(
-                // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  CircleAvatar(
-                      child: Image.network(widget.signInData!.photoURL!)),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(appState.userName ?? 'No username provided'),
-                      IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _isEditing = true;
-                              _usernameController.text = appState.userName;
-                            });
-                          },
-                          icon: const Icon(Icons.edit))
+                      // CircleAvatar(
+                      //   radius: 40,
+                      //   child: Image.network(
+                      //     widget.signInData!.photoURL!,
+                      //   ),
+                      // ),
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundImage:
+                            NetworkImage(widget.signInData!.photoURL!),
+                      ),
+                      // Spacer(),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    appState.userName ?? 'No username provided',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _isEditing = !_isEditing;
+                                          _usernameController.text = '';
+                                        });
+                                      },
+                                      icon: const Icon(Icons.edit))
+                                ],
+                              ),
+                              Text(appState.userEmail ?? 'No email provided'),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Spacer()
                     ],
                   ),
-                  Visibility(
-                    visible: _isEditing,
-                    child: Column(
-                      children: [
-                        TextField(
-                          controller: _usernameController,
-                        ),
-                        Row(
-                          children: [
-                            ElevatedButton(
-                              onPressed: () async {
-                                await DatabaseService.updateUserName(
-                                    appState.userUid, _usernameController.text);
-                                await appState.initUser(appState.userUid);
-                                setState(() {
-                                  _isEditing = false;
-                                });
-                              },
-                              child: const Text('Save'),
+                  IgnorePointer(
+                    ignoring: !_isEditing,
+                    child: AnimatedOpacity(
+                      opacity: _isEditing ? 1 : 0,
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.bounceIn,
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: _usernameController,
+                            decoration: InputDecoration(
+                              // helperText: 'type new username',
+                              hintText: 'Type new username',
                             ),
-                            TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  _isEditing = false;
-                                  _usernameController.text = '';
-                                });
-                              },
-                              child: const Text('Cancel'),
-                            ),
-                          ],
-                        )
-                      ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () async {
+                                  await DatabaseService.updateUserName(
+                                      appState.userUid,
+                                      _usernameController.text);
+                                  await appState.initUser(appState.userUid);
+                                  setState(() {
+                                    _isEditing = false;
+                                    _usernameController.text = '';
+                                  });
+                                },
+                                child: const Text('Save'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _isEditing = false;
+                                    _usernameController.text = '';
+                                  });
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
                     ),
                   ),
-                  Text(appState.userEmail ?? 'No email provided'),
                   const Spacer(),
-                  Visibility(
-                    child: Column(
-                      children: [
-                        Text(
-                            'Your device didn\'t have encryption keys. You are unable write or receive new messages. Create new keys or use device with proper encryption keys.'),
-                        TextButton(
-                            onPressed: () {},
+                  Container(
+                    // width: double.infinity,
+                    decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 198, 198, 198)),
+                    child: Visibility(
+                      visible: !_privateKeyExist,
+                      child: Column(
+                        // crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Divider(),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              'This device has no encryption keys. You can’t send or receive new messages. To continue using this app on this device, please delete your account and sign in again. Alternatively, use a device that has valid encryption keys.',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          OutlinedButton(
                             style: ButtonStyle(
-                                backgroundColor:
-                                    WidgetStatePropertyAll(Colors.blueAccent)),
-                            child: Text('Create new keys'))
-                      ],
+                                foregroundColor:
+                                    WidgetStatePropertyAll(Colors.red)),
+                            onPressed: AuthService().deleteOAuth2Account,
+                            child: const Text('Recreate account'),
+                          ),
+                          Divider(),
+                        ],
+                      ),
                     ),
-                  )
+                  ),
+                  const Spacer(),
                 ],
               ),
             ),
