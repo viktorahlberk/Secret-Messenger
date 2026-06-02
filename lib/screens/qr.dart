@@ -8,6 +8,13 @@ class QrScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(), body: Center(child: QrCodeService.createQrCode(uid)));
+      backgroundColor: Colors.grey.shade400,
+      appBar: AppBar(
+        backgroundColor: Colors.grey.shade400,
+      ),
+      body: Center(
+        child: QrCodeService.createQrCode(uid),
+      ),
+    );
   }
 }

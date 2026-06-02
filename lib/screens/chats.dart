@@ -1,6 +1,4 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:secure_messenger/screens/chat.dart';
 import 'package:secure_messenger/services/firebase/database.dart';
 
@@ -21,7 +19,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
     super.initState();
   }
 
-  fetchChats(userUid) async {
+  void fetchChats(String userUid) async {
     List<Map>? c = await DatabaseService.fetchUserChats(userUid);
     if (c != null) {
       setState(() {
@@ -31,7 +29,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
   }
 
   ///Convert chatters string to opponent username.
-  Future<String> convert(chattersString) async {
+  Future<String> convert(String chattersString) async {
     var splitted = chattersString.split(' ');
     if (splitted[0] == widget.userUid) {
       String r = await DatabaseService.userNameFromUserUid(splitted[1]);
@@ -42,7 +40,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
     }
   }
 
-  openChat(roomId, opponent) {
+  void openChat(int roomId, String opponent) {
     Navigator.push(
         context,
         MaterialPageRoute(

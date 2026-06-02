@@ -64,7 +64,7 @@ class _ProfilePageState extends State<ProfilePage> {
     Navigator.pop(context);
   }
 
-  navigateToSearchScreen() {
+  void navigateToSearchScreen() {
     Navigator.push(
         context,
         MaterialPageRoute(
@@ -74,10 +74,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> navigateToQrScreen() async {
     await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => QrScreen(widget.signInData!.uid),
-        ));
+      context,
+      MaterialPageRoute(
+        builder: (context) => QrScreen(widget.signInData!.uid),
+      ),
+    );
   }
 
   @override
@@ -89,24 +90,25 @@ class _ProfilePageState extends State<ProfilePage> {
           appBar: AppBar(
             backgroundColor: Colors.grey.shade400,
             automaticallyImplyLeading: false,
-            // title: Center(child: Text('Profile')),
             leading: Visibility(
               visible: _privateKeyExist,
               child: IconButton(
-                  onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ChatsScreen(widget.signInData!.uid),
-                      )),
-                  icon: const Icon(Icons.chat)),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatsScreen(widget.signInData!.uid),
+                  ),
+                ),
+                icon: const Icon(Icons.chat),
+              ),
             ),
             actions: [
               IconButton(
                   onPressed: navigateToQrScreen, icon: Icon(Icons.qr_code_2)),
               IconButton(
-                  onPressed: navigateToSearchScreen,
-                  icon: const Icon(Icons.search)),
+                onPressed: navigateToSearchScreen,
+                icon: const Icon(Icons.search),
+              ),
               IconButton(
                 onPressed: () => logOut(),
                 icon: const Icon(Icons.logout),
@@ -117,17 +119,9 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
-                // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Row(
-                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // CircleAvatar(
-                      //   radius: 40,
-                      //   child: Image.network(
-                      //     widget.signInData!.photoURL!,
-                      //   ),
-                      // ),
                       CircleAvatar(
                         radius: 30,
                         backgroundImage:

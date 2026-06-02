@@ -16,9 +16,8 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   TextEditingController textFieldController = TextEditingController();
 
-  scanQrCodeAndShowUser(context) async {
+  Future<void> scanQrCodeAndShowUser(context) async {
     String uid = await QrCodeService.scanQrCode();
-    // print(uid);
     if (uid.isNotEmpty) {
       UserProfile? userProfile = await DatabaseService.fetchUserData(uid);
       var response = await showDialog(
@@ -56,7 +55,7 @@ class _SearchScreenState extends State<SearchScreen> {
         },
       );
       if (response != null) {
-        var r = await DatabaseService.isUsersHaveChat(widget.userUid, uid);
+        int? r = await DatabaseService.isUsersHaveChat(widget.userUid, uid);
         if (r == null) {
           startChatWith(context, uid);
         } else {
@@ -150,19 +149,27 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Search')),
+      backgroundColor: Colors.grey.shade400,
+      appBar: AppBar(
+        title: const Text('Search'),
+        backgroundColor: Colors.grey.shade400,
+      ),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    keyboardType: TextInputType.emailAddress,
-                    controller: textFieldController,
-                    decoration:
-                        const InputDecoration(hintText: 'Search by email'),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                      keyboardType: TextInputType.emailAddress,
+                      controller: textFieldController,
+                      decoration:
+                          const InputDecoration(hintText: 'Search by email'),
+                    ),
                   ),
                 ),
                 IconButton(
@@ -175,9 +182,18 @@ class _SearchScreenState extends State<SearchScreen> {
               ],
             ),
           ),
-          const Divider(),
+          SizedBox(
+            height: 70,
+          ),
+          // const Divider(
+          //   indent: 10,
+          //   endIndent: 10,
+          // ),
           const Text('or scan QR Code'),
-          TextButton(
+          SizedBox(
+            height: 35,
+          ),
+          OutlinedButton(
             onPressed: () => scanQrCodeAndShowUser(context),
             child: const Text('Scan'),
           )

@@ -3,11 +3,11 @@ import 'package:qr_flutter/qr_flutter.dart';
 // import 'package:secure_messenger/models/user_profile.dart';
 
 class QrCodeService {
-  static createQrCode(String uid) {
+  static QrImageView createQrCode(String uid) {
     return QrImageView(data: uid);
   }
 
-  static scanQrCode() async {
+  static Future<String> scanQrCode() async {
     var result = await BarcodeScanner.scan();
 
     // print(result.type); // The result type (barcode, cancelled, failed)

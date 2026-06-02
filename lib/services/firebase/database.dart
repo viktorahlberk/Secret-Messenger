@@ -9,8 +9,6 @@ import 'package:secure_messenger/models/user_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webcrypto/webcrypto.dart';
 
-// import 'encryption.dart';
-
 class DatabaseService {
   static FutureOr<bool> isUserExists(String userUID) async {
     DataSnapshot snapshot =
@@ -181,7 +179,7 @@ class DatabaseService {
     }
   }
 
-  static userNameFromUserUid(String userUid) async {
+  static Future<String> userNameFromUserUid(String userUid) async {
     DataSnapshot snapshot = await FirebaseDatabase.instance
         .ref()
         .child('users/$userUid/userName')
@@ -189,53 +187,47 @@ class DatabaseService {
     if (snapshot.exists) {
       String userName = snapshot.value as String;
       return userName;
-      // inspect(u);
-      // return UserProfile(userUid, u['userName'], u['email'], u['picturePath']);
-      // return User(u['username'], u['email'], double.parse(u['balance']));
     }
+    return '';
   }
 
-  static isUsersHaveChat(u1, u2) async {
+  static Future<int?> isUsersHaveChat(String u1, String u2) async {
     DataSnapshot snapshot = await FirebaseDatabase.instance.ref('chats').get();
     if (snapshot.exists) {
       var chats = snapshot.value as Map;
       int? roomId;
       chats.forEach((key, value) {
-        // print(value['chatters'].contains(u1) && value['chatters'].contains(u2));
         if (value['chatters'].contains(u1) && value['chatters'].contains(u2)) {
           roomId = value['roomId'];
-          // return roomId;
-        } else {
-          // return null;
         }
       });
-      // print(roomId);
       return roomId;
     }
+    return null;
   }
 
-  static userIsTypingSetter(int chatUid, String userUid) async {
+  static Future<void> userIsTypingSetter(int chatUid, String userUid) async {
     DatabaseReference ref =
         FirebaseDatabase.instance.ref('chats/$chatUid/typing/$userUid');
     await ref.set(true);
   }
 
-  static userIsTypingDeleter(int chatUid, String userUid) async {
+  static Future<void> userIsTypingDeleter(int chatUid, String userUid) async {
     DatabaseReference ref =
         FirebaseDatabase.instance.ref('chats/$chatUid/typing/$userUid');
     await ref.set(false);
   }
 
-  static deleteMessage(int chatUid, String messageUid) async {
+  static Future<void> deleteMessage(int chatUid, String messageUid) async {
     DatabaseReference ref =
         FirebaseDatabase.instance.ref('chats/$chatUid/messages/$messageUid');
     await ref.set(null);
   }
 
-  static editMessage(int chatUid, String messageUid, newMessage) async {
+  static Future<void> editMessage(
+      int chatUid, String messageUid, newMessage) async {
     DatabaseReference ref = FirebaseDatabase.instance
         .ref('chats/$chatUid/messages/$messageUid/message');
     ref.set(newMessage);
   }
-  // static deleteUser
 }
